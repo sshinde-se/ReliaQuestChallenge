@@ -23,8 +23,7 @@ public class EmployeeDataProvider {
     }
     public static EmployeeResponse getInvalidEmployeeResponse(){
         return EmployeeResponse.builder()
-                .data(Employee.builder().id("a4d7ea02-e9fd-42b8-88bb-33ba9eca73ca").name("ABC")
-                        .title("Dev").age(3).build()).status("Successfully processed request.").build();
+                .data(Employee.builder().name("John").salary(15000).age(25).title("7!").build()).status("Successfully processed request.").build();
     }
     public static Employee getEmployee2() {
         return Employee.builder()
@@ -50,15 +49,6 @@ public class EmployeeDataProvider {
         employeeInput.setSalary(15000);
         employeeInput.setAge(25);
         employeeInput.setTitle("QA");
-        return employeeInput;
-    }
-
-    public static EmployeeRequest getInvalidEmployeeInput() {
-        EmployeeRequest employeeInput = new EmployeeRequest();
-        employeeInput.setName("John");
-        employeeInput.setSalary(15000);
-        employeeInput.setAge(25);
-        employeeInput.setTitle("7!");
         return employeeInput;
     }
 

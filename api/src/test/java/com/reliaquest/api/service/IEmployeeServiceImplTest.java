@@ -18,6 +18,7 @@ import java.util.List;
 import java.util.UUID;
 
 import static com.reliaquest.api.dataprovider.EmployeeDataProvider.*;
+import static com.reliaquest.api.dataprovider.EmployeeDataProvider.getEmployeeInput;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
@@ -75,7 +76,7 @@ class IEmployeeServiceImplTest {
     @Test
     void testGetEmployeesByNameSearchWhenFeignClientThrowsException() {
         when(employeeFeignClient.getAllEmployees())
-                .thenThrow(new FeignException.NotFound("", request, null, new HashMap<>()));
+                .thenThrow(FeignException.class);
         APIException apiException = assertThrows(APIException.class, () -> iEmployeeService.getEmployeesByNameSearch("John"));
         assertEquals(ErrorCode.EXCEPTION_WHILE_CALLING_EXTERNAL_API, apiException.getErrorCode());
     }
@@ -87,7 +88,19 @@ class IEmployeeServiceImplTest {
         assertEquals("Sanjivani", employee.getName());
     }
 
-
+    @Test
+    void testGetEmployeeByIdWhenNoRecordsFound() {
+        when(employeeFeignClient.getEmployeeById(UUID.fromString("a4d7ea02-e9fd-42b8-88bb-33ba9eca76ca"))).thenThrow(FeignException.NotFound.class);
+        APIException apiException = assertThrows(APIException.class, () -> iEmployeeService.getEmployeeById("a4d7ea02-e9fd-42b8-88bb-33ba9eca76ca"));
+        assertEquals(ErrorCode.NO_RECORDS_FOUND, apiException.getErrorCode());
+    }
+    @Test
+    void testGetEmployeeByIdWhenFeignClientThrowsException() {
+        when(employeeFeignClient.getEmployeeById(UUID.fromString("a4d7ea02-e9fd-42b8-88bb-33ba9eca74ca")))
+                .thenThrow(FeignException.class);
+        APIException apiException = assertThrows(APIException.class, () -> iEmployeeService.getEmployeeById("a4d7ea02-e9fd-42b8-88bb-33ba9eca74ca"));
+        assertEquals(ErrorCode.EXCEPTION_WHILE_CALLING_EXTERNAL_API, apiException.getErrorCode());
+    }
     @Test
     void testGetHighestSalaryOfEmployees() {
         when(employeeFeignClient.getAllEmployees()).thenReturn(getEmployeesResponse());
@@ -105,7 +118,7 @@ class IEmployeeServiceImplTest {
     @Test
     void testGetHighestSalaryOfEmployeesWhenFeignClientThrowsException() {
         when(employeeFeignClient.getAllEmployees())
-                .thenThrow(new FeignException.NotFound("", request, null, new HashMap<>()));
+                .thenThrow(FeignException.class);
         APIException apiException = assertThrows(APIException.class, () -> iEmployeeService.getHighestSalaryOfEmployees());
         assertEquals(ErrorCode.EXCEPTION_WHILE_CALLING_EXTERNAL_API, apiException.getErrorCode());
     }
@@ -131,7 +144,7 @@ class IEmployeeServiceImplTest {
     @Test
     void testGetTopTenHighestEarningEmployeeNamesWhenFeignClientThrowsException() {
         when(employeeFeignClient.getAllEmployees())
-                .thenThrow(new FeignException.NotFound("", request, null, new HashMap<>()));
+                .thenThrow(FeignException.class);
         APIException apiException = assertThrows(APIException.class, () -> iEmployeeService.getTopTenHighestEarningEmployeeNames());
         assertEquals(ErrorCode.EXCEPTION_WHILE_CALLING_EXTERNAL_API, apiException.getErrorCode());
     }
@@ -142,6 +155,24 @@ class IEmployeeServiceImplTest {
         Employee employee = iEmployeeService.createEmployee(getEmployeeInput());
         assertEquals(getEmployee(), employee);
     }
-
-
+    @Test
+    void testCreateEmployeeWhenFeignClientThrowsException() {
+        when(employeeFeignClient.createEmployee(any()))
+                .thenThrow(FeignException.class);
+        APIException apiException = assertThrows(APIException.class, () -> iEmployeeService.createEmployee(getEmployeeInput()));
+        assertEquals(ErrorCode.EXCEPTION_WHILE_CALLING_EXTERNAL_API, apiException.getErrorCode());
+    }
+    @Test
+    void testDeleteEmployeeById() {
+        when(employeeFeignClient.getEmployeeById(UUID.fromString("a4d7ea02-e9fd-42b8-88bb-33ba9eca76ca"))).thenReturn(getEmployeeResponse());
+        String expectedRes = iEmployeeService.deleteEmployeeById("a4d7ea02-e9fd-42b8-88bb-33ba9eca76ca");
+        assertEquals("Sanjivani", expectedRes);
+    }
+    @Test
+    void testDeleteEmployeeByIdWhenFeignClientThrowsException() {
+        when(employeeFeignClient.getEmployeeById(UUID.fromString("a4d7ea02-e9fd-42b8-88bb-33ba9eca76ca")))
+                .thenThrow(FeignException.class);
+        APIException apiException = assertThrows(APIException.class, () -> iEmployeeService.deleteEmployeeById("a4d7ea02-e9fd-42b8-88bb-33ba9eca76ca"));
+        assertEquals(ErrorCode.EXCEPTION_WHILE_CALLING_EXTERNAL_API, apiException.getErrorCode());
+    }
 }
